@@ -1,0 +1,8 @@
+{
+  "goerli": {
+    "TreeController": {
+      "address": "0xD61cb2CF57d401513cf4B617ED606838246DAE45",
+      "startBlock": 8714459
+    }
+  }
+}
