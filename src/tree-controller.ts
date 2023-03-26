@@ -5,9 +5,21 @@ import {
   TreeWithdrew,
 } from "../generated/TreeController/TreeController";
 import { TreeNFT } from "../generated/TreeController/TreeNFT";
-import { Tree, Report, Owner, Auditor, NFT, App } from "../generated/schema";
-import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
+import {
+  Tree,
+  Report,
+  Owner,
+  NFT,
+  App,
+} from "../generated/schema";
+import { Address, BigInt } from "@graphprotocol/graph-ts";
 import { getOrCreateAuditor } from "./tree-auditor";
+import {
+  createTreeAddedFeed,
+  createTreeAuditedFeed,
+  createTreeTransferredFeed,
+  createTreeWithdrewFeed,
+} from "./helpers/feed";
 
 const APP_ID = "app";
 
@@ -45,6 +57,8 @@ export function handleTreeAdded(event: TreeAdded): void {
   owner.totalTrees = owner.totalTrees.plus(event.params.treeNumber);
   app.totalTrees = app.totalTrees.plus(event.params.treeNumber);
 
+  createTreeAddedFeed(event, tree, owner);
+
   owner.save();
   tree.save();
   app.save();
@@ -72,6 +86,8 @@ export function handleTreeTransferred(event: TreeTransferred): void {
       oldOwner.auditedTrees = oldOwner.auditedTrees.minus(tree.treeNumber);
       newOwner.auditedTrees = newOwner.auditedTrees.plus(tree.treeNumber);
     }
+
+    createTreeTransferredFeed(event, tree, oldOwner, newOwner);
 
     tree.save();
   }
@@ -101,6 +117,8 @@ export function handleTreeWithdrew(event: TreeWithdrew): void {
     tree.owner = Address.zero();
     tree.isActive = false;
 
+    createTreeWithdrewFeed(event, tree, owner);
+
     owner.save();
     tree.save();
   }
@@ -113,8 +131,9 @@ export function handleTreeAudited(event: TreeAudited): void {
 
   const reportId = event.transaction.hash.toHex();
   const report = new Report(reportId);
+  const auditor = getOrCreateAuditor(event.params.auditor);
 
-  report.auditor = getOrCreateAuditor(event.params.auditor).id;
+  report.auditor = auditor.id;
   report.treeNumber = event.params.treeNumber;
   report.timestamp = event.block.timestamp;
   report.transactionHash = event.transaction.hash;
@@ -127,8 +146,8 @@ export function handleTreeAudited(event: TreeAudited): void {
     const isIncrease = event.params.treeNumber.gt(tree.treeNumber);
 
     if (!isAudited) {
-      app.auditedTrees = app.auditedTrees.plus(event.params.treeNumber)
-      owner.auditedTrees = owner.auditedTrees.plus(event.params.treeNumber)
+      app.auditedTrees = app.auditedTrees.plus(event.params.treeNumber);
+      owner.auditedTrees = owner.auditedTrees.plus(event.params.treeNumber);
     }
 
     if (isIncrease) {
@@ -154,6 +173,8 @@ export function handleTreeAudited(event: TreeAudited): void {
     tree.reportCount = tree.reportCount.plus(BigInt.fromI32(1));
     report.tree = tree.id;
 
+    createTreeAuditedFeed(event, tree, auditor, report);
+
     app.save();
     tree.save();
     owner.save();
@@ -168,6 +189,7 @@ export function getOrCreateOwner(id: Address): Owner {
     owner = new Owner(id);
     owner.totalTrees = BigInt.fromI32(0);
     owner.auditedTrees = BigInt.fromI32(0);
+    owner.isAuditor = false;
     owner.save();
   }
   return owner;
