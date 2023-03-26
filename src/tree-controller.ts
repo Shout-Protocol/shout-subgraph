@@ -170,6 +170,7 @@ export function handleTreeAudited(event: TreeAudited): void {
       }
     }
 
+    tree.treeNumber = event.params.treeNumber;
     tree.reportCount = tree.reportCount.plus(BigInt.fromI32(1));
     report.tree = tree.id;
 
@@ -196,7 +197,7 @@ export function getOrCreateOwner(id: Address): Owner {
 }
 
 export function getOrCreateNFT(address: Address, tokenId: BigInt): NFT {
-  let id = address.toHex() + "-" + tokenId.toHex();
+  let id = address.toHex() + "-" + tokenId.toString();
   let nft = NFT.load(id);
   if (nft == null) {
     nft = new NFT(id);
