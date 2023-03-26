@@ -1,110 +1,141 @@
-import { newMockEvent } from "matchstick-as"
-import { ethereum, Address, BigInt } from "@graphprotocol/graph-ts"
+import { newMockEvent } from "matchstick-as";
+import { ethereum, Address, BigInt } from "@graphprotocol/graph-ts";
 import {
-  Approval,
-  DelegateChanged,
-  DelegateVotesChanged,
-  Transfer
-} from "../generated/TreeController/TreeController"
+  TreeAdded,
+  TreeTransferred,
+  TreeWithdrew,
+  TreeAudited,
+} from "../generated/TreeController/TreeController";
 
-export function createApprovalEvent(
+export function createTreeAddedEvent(
   owner: Address,
-  spender: Address,
-  value: BigInt
-): Approval {
-  let approvalEvent = changetype<Approval>(newMockEvent())
+  nftAddress: Address,
+  tokenId: BigInt,
+  treeNumber: BigInt
+): TreeAdded {
+  let treeAddedEvent = newMockEvent() as TreeAdded;
 
-  approvalEvent.parameters = new Array()
+  treeAddedEvent.parameters = new Array();
 
-  approvalEvent.parameters.push(
+  treeAddedEvent.parameters.push(
     new ethereum.EventParam("owner", ethereum.Value.fromAddress(owner))
-  )
-  approvalEvent.parameters.push(
-    new ethereum.EventParam("spender", ethereum.Value.fromAddress(spender))
-  )
-  approvalEvent.parameters.push(
-    new ethereum.EventParam("value", ethereum.Value.fromUnsignedBigInt(value))
-  )
+  );
+  treeAddedEvent.parameters.push(
+    new ethereum.EventParam(
+      "nftAddress",
+      ethereum.Value.fromAddress(nftAddress)
+    )
+  );
+  treeAddedEvent.parameters.push(
+    new ethereum.EventParam(
+      "tokenId",
+      ethereum.Value.fromUnsignedBigInt(tokenId)
+    )
+  );
 
-  return approvalEvent
+  treeAddedEvent.parameters.push(
+    new ethereum.EventParam(
+      "treeNumber",
+      ethereum.Value.fromUnsignedBigInt(treeNumber)
+    )
+  );
+
+  return treeAddedEvent;
 }
 
-export function createDelegateChangedEvent(
-  delegator: Address,
-  fromDelegate: Address,
-  toDelegate: Address
-): DelegateChanged {
-  let delegateChangedEvent = changetype<DelegateChanged>(newMockEvent())
-
-  delegateChangedEvent.parameters = new Array()
-
-  delegateChangedEvent.parameters.push(
-    new ethereum.EventParam("delegator", ethereum.Value.fromAddress(delegator))
-  )
-  delegateChangedEvent.parameters.push(
-    new ethereum.EventParam(
-      "fromDelegate",
-      ethereum.Value.fromAddress(fromDelegate)
-    )
-  )
-  delegateChangedEvent.parameters.push(
-    new ethereum.EventParam(
-      "toDelegate",
-      ethereum.Value.fromAddress(toDelegate)
-    )
-  )
-
-  return delegateChangedEvent
-}
-
-export function createDelegateVotesChangedEvent(
-  delegate: Address,
-  previousBalance: BigInt,
-  newBalance: BigInt
-): DelegateVotesChanged {
-  let delegateVotesChangedEvent = changetype<DelegateVotesChanged>(
-    newMockEvent()
-  )
-
-  delegateVotesChangedEvent.parameters = new Array()
-
-  delegateVotesChangedEvent.parameters.push(
-    new ethereum.EventParam("delegate", ethereum.Value.fromAddress(delegate))
-  )
-  delegateVotesChangedEvent.parameters.push(
-    new ethereum.EventParam(
-      "previousBalance",
-      ethereum.Value.fromUnsignedBigInt(previousBalance)
-    )
-  )
-  delegateVotesChangedEvent.parameters.push(
-    new ethereum.EventParam(
-      "newBalance",
-      ethereum.Value.fromUnsignedBigInt(newBalance)
-    )
-  )
-
-  return delegateVotesChangedEvent
-}
-
-export function createTransferEvent(
+export function createTreeTransferredEvent(
   from: Address,
   to: Address,
-  value: BigInt
-): Transfer {
-  let transferEvent = changetype<Transfer>(newMockEvent())
+  nftAddress: Address,
+  tokenId: BigInt
+): TreeTransferred {
+  let treeTransferredEvent = newMockEvent() as TreeTransferred;
 
-  transferEvent.parameters = new Array()
+  treeTransferredEvent.parameters = new Array();
 
-  transferEvent.parameters.push(
+  treeTransferredEvent.parameters.push(
     new ethereum.EventParam("from", ethereum.Value.fromAddress(from))
-  )
-  transferEvent.parameters.push(
+  );
+  treeTransferredEvent.parameters.push(
     new ethereum.EventParam("to", ethereum.Value.fromAddress(to))
-  )
-  transferEvent.parameters.push(
-    new ethereum.EventParam("value", ethereum.Value.fromUnsignedBigInt(value))
-  )
+  );
+  treeTransferredEvent.parameters.push(
+    new ethereum.EventParam(
+      "nftAddress",
+      ethereum.Value.fromAddress(nftAddress)
+    )
+  );
 
-  return transferEvent
+  treeTransferredEvent.parameters.push(
+    new ethereum.EventParam(
+      "tokenId",
+      ethereum.Value.fromUnsignedBigInt(tokenId)
+    )
+  );
+
+  return treeTransferredEvent;
+}
+
+export function createTreeWithdrew(
+  to: Address,
+  nftAddress: Address,
+  tokenId: BigInt
+): TreeWithdrew {
+  let treeWithdrewEvent = newMockEvent() as TreeWithdrew;
+
+  treeWithdrewEvent.parameters = new Array();
+
+  treeWithdrewEvent.parameters.push(
+    new ethereum.EventParam("to", ethereum.Value.fromAddress(to))
+  );
+  treeWithdrewEvent.parameters.push(
+    new ethereum.EventParam(
+      "nftAddress",
+      ethereum.Value.fromAddress(nftAddress)
+    )
+  );
+  treeWithdrewEvent.parameters.push(
+    new ethereum.EventParam(
+      "tokenId",
+      ethereum.Value.fromUnsignedBigInt(tokenId)
+    )
+  );
+
+  return treeWithdrewEvent;
+}
+
+export function createTreeAuditedEvent(
+  auditor: Address,
+  nftAddress: Address,
+  tokenId: BigInt,
+  treeNumber: BigInt
+): TreeAudited {
+  let treeAuditedEvent = newMockEvent() as TreeAudited;
+
+  treeAuditedEvent.parameters = new Array();
+
+  treeAuditedEvent.parameters.push(
+    new ethereum.EventParam("auditor", ethereum.Value.fromAddress(auditor))
+  );
+  treeAuditedEvent.parameters.push(
+    new ethereum.EventParam(
+      "nftAddress",
+      ethereum.Value.fromAddress(nftAddress)
+    )
+  );
+  treeAuditedEvent.parameters.push(
+    new ethereum.EventParam(
+      "tokenId",
+      ethereum.Value.fromUnsignedBigInt(tokenId)
+    )
+  );
+
+  treeAuditedEvent.parameters.push(
+    new ethereum.EventParam(
+      "treeNumber",
+      ethereum.Value.fromUnsignedBigInt(treeNumber)
+    )
+  );
+
+  return treeAuditedEvent;
 }

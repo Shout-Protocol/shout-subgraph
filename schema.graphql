@@ -17,6 +17,7 @@ type Tree @entity {
   isActive: Boolean!
 
   reports: [Report!]! @derivedFrom(field: "tree")
+  reportCount: BigInt!
 
   createdAt: BigInt!
   createdTxHash: Bytes!
@@ -28,14 +29,23 @@ type Owner @entity {
   id: Bytes! # Use bytes as ID
   ownedTrees: [Tree!]! @derivedFrom(field: "owner")
   totalTrees: BigInt!
+  auditedTrees: BigInt!
+  isAuditor: Boolean!
 }
 
 type Auditor @entity {
   id: Bytes! # Use bytes as ID
+  isActive: Boolean!
   auditReports: [Report!]! @derivedFrom(field: "auditor")
 }
 
 type NFT @entity {
   id: ID! # Use bytes as ID
   tokenUri: String!
+}
+
+type App @entity {
+  id: ID!
+  totalTrees: BigInt!
+  auditedTrees: BigInt!
 }

@@ -1,54 +1,58 @@
 import {
-  TreeAdded, TreeAudited, TreeTransferred, TreeWithdrew
-} from "../generated/TreeController/TreeController"
-import {
-  TreeNFT
-} from "../generated/TreeController/TreeNFT"
-import {
-  Tree,
-  Report,
-  Owner,
-  Auditor,
-  NFT,
-} from "../generated/schema"
+  TreeAdded,
+  TreeAudited,
+  TreeTransferred,
+  TreeWithdrew,
+} from "../generated/TreeController/TreeController";
+import { TreeNFT } from "../generated/TreeController/TreeNFT";
+import { Tree, Report, Owner, Auditor, NFT, App } from "../generated/schema";
 import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
+import { getOrCreateAuditor } from "./tree-auditor";
+
+const APP_ID = "app";
 
 export function handleTreeAdded(event: TreeAdded): void {
-  const id = event.params.nftAddress.toHex() + '-' + event.params.tokenId.toHex()
+  const id =
+    event.params.nftAddress.toHex() + "-" + event.params.tokenId.toString();
 
   let tree = Tree.load(id);
+  let app = getOrCreateApp();
   let owner = getOrCreateOwner(event.params.owner);
 
   if (!tree) {
-    tree = new Tree(id)
-    tree.owner = owner.id
-    tree.nftAddress = event.params.nftAddress
-    tree.tokenId = event.params.tokenId
-    tree.treeNumber = event.params.treeNumber
-    tree.isActive = true
-    tree.nft = getOrCreateNFT(event.params.nftAddress, event.params.tokenId).id
+    tree = new Tree(id);
+    tree.owner = owner.id;
+    tree.nftAddress = event.params.nftAddress;
+    tree.tokenId = event.params.tokenId;
+    tree.treeNumber = event.params.treeNumber;
+    tree.isActive = true;
+    tree.nft = getOrCreateNFT(event.params.nftAddress, event.params.tokenId).id;
+    tree.reportCount = BigInt.fromI32(0);
 
-    tree.createdAt = event.block.timestamp
-    tree.createdTxHash = event.transaction.hash
-    tree.updatedAt = event.block.timestamp
-    tree.updatedTxHash = event.transaction.hash
+    tree.createdAt = event.block.timestamp;
+    tree.createdTxHash = event.transaction.hash;
+    tree.updatedAt = event.block.timestamp;
+    tree.updatedTxHash = event.transaction.hash;
   } else {
-    tree.owner = owner.id
-    tree.treeNumber = event.params.treeNumber
+    tree.owner = owner.id;
+    tree.treeNumber = event.params.treeNumber;
 
-    tree.isActive = true
-    tree.updatedAt = event.block.timestamp
-    tree.updatedTxHash = event.transaction.hash
+    tree.isActive = true;
+    tree.updatedAt = event.block.timestamp;
+    tree.updatedTxHash = event.transaction.hash;
   }
 
-  owner.totalTrees = owner.totalTrees.plus(event.params.treeNumber)
+  owner.totalTrees = owner.totalTrees.plus(event.params.treeNumber);
+  app.totalTrees = app.totalTrees.plus(event.params.treeNumber);
 
-  owner.save()
-  tree.save()
+  owner.save();
+  tree.save();
+  app.save();
 }
 
 export function handleTreeTransferred(event: TreeTransferred): void {
-  const id = event.params.nftAddress.toHex() + '-' + event.params.tokenId.toHex()
+  const id =
+    event.params.nftAddress.toHex() + "-" + event.params.tokenId.toString();
 
   let tree = Tree.load(id);
   let oldOwner = getOrCreateOwner(event.params.from);
@@ -57,68 +61,105 @@ export function handleTreeTransferred(event: TreeTransferred): void {
   if (tree) {
     tree.owner = event.params.to;
 
-    tree.updatedAt = event.block.timestamp
-    tree.updatedTxHash = event.transaction.hash
+    tree.updatedAt = event.block.timestamp;
+    tree.updatedTxHash = event.transaction.hash;
 
-    oldOwner.totalTrees = oldOwner.totalTrees.minus(tree.treeNumber)
-    newOwner.totalTrees = newOwner.totalTrees.plus(tree.treeNumber)
+    oldOwner.totalTrees = oldOwner.totalTrees.minus(tree.treeNumber);
+    newOwner.totalTrees = newOwner.totalTrees.plus(tree.treeNumber);
 
-    tree.save()
+    const isAudited = tree.reportCount.gt(BigInt.fromI32(0));
+    if (isAudited) {
+      oldOwner.auditedTrees = oldOwner.auditedTrees.minus(tree.treeNumber);
+      newOwner.auditedTrees = newOwner.auditedTrees.plus(tree.treeNumber);
+    }
+
+    tree.save();
   }
 
-  oldOwner.save()
-  newOwner.save()
+  oldOwner.save();
+  newOwner.save();
 }
 
-export function handleTreeWithdrew(
-  event: TreeWithdrew
-): void {
-  const id = event.params.nftAddress.toHex() + '-' + event.params.tokenId.toHex()
+export function handleTreeWithdrew(event: TreeWithdrew): void {
+  const id =
+    event.params.nftAddress.toHex() + "-" + event.params.tokenId.toString();
 
   const tree = Tree.load(id);
+  const app = getOrCreateApp();
 
   if (tree) {
-    const owner = getOrCreateOwner(tree.owner as Address)
-    owner.totalTrees = owner.totalTrees.minus(tree.treeNumber)
+    const owner = getOrCreateOwner(Address.fromBytes(tree.owner));
+    owner.totalTrees = owner.totalTrees.minus(tree.treeNumber);
+    app.totalTrees = app.totalTrees.minus(tree.treeNumber);
 
-    tree.owner = Address.zero()
-    tree.isActive = false
+    const isAudited = tree.reportCount.gt(BigInt.fromI32(0));
+    if (isAudited) {
+      app.auditedTrees = app.auditedTrees.minus(tree.treeNumber);
+      owner.auditedTrees = owner.auditedTrees.minus(tree.treeNumber);
+    }
 
-    owner.save()
-    tree.save()
+    tree.owner = Address.zero();
+    tree.isActive = false;
+
+    owner.save();
+    tree.save();
   }
 }
 
 export function handleTreeAudited(event: TreeAudited): void {
-  const treeId = event.params.nftAddress.toHex() + '-' + event.params.tokenId.toHex()
+  const treeId =
+    event.params.nftAddress.toHex() + "-" + event.params.tokenId.toString();
   const tree = Tree.load(treeId);
 
   const reportId = event.transaction.hash.toHex();
   const report = new Report(reportId);
 
-  report.auditor = getOrCreateAuditor(event.params.auditor).id
-  report.treeNumber = event.params.treeNumber
-  report.timestamp = event.block.timestamp
-  report.transactionHash = event.transaction.hash
+  report.auditor = getOrCreateAuditor(event.params.auditor).id;
+  report.treeNumber = event.params.treeNumber;
+  report.timestamp = event.block.timestamp;
+  report.transactionHash = event.transaction.hash;
 
   if (tree) {
-    const owner = getOrCreateOwner(tree.owner as Address)
+    const app = getOrCreateApp();
+    const owner = getOrCreateOwner(Address.fromBytes(tree.owner));
 
-    if (event.params.treeNumber.gt(tree.treeNumber)) {
-      const diff = event.params.treeNumber.minus(tree.treeNumber)
-      owner.totalTrees = owner.totalTrees.plus(diff)
-    } else {
-      const diff = tree.treeNumber.minus(event.params.treeNumber)
-      owner.totalTrees = owner.totalTrees.minus(diff)
+    const isAudited = tree.reportCount.gt(BigInt.fromI32(0));
+    const isIncrease = event.params.treeNumber.gt(tree.treeNumber);
+
+    if (!isAudited) {
+      app.auditedTrees = app.auditedTrees.plus(event.params.treeNumber)
+      owner.auditedTrees = owner.auditedTrees.plus(event.params.treeNumber)
     }
 
-    report.tree = tree.id
+    if (isIncrease) {
+      const diff = event.params.treeNumber.minus(tree.treeNumber);
+      owner.totalTrees = owner.totalTrees.plus(diff);
+      app.totalTrees = app.totalTrees.plus(diff);
 
-    tree.save()
-    owner.save()
+      if (isAudited) {
+        app.auditedTrees = app.auditedTrees.plus(diff);
+        owner.auditedTrees = owner.auditedTrees.plus(diff);
+      }
+    } else {
+      const diff = tree.treeNumber.minus(event.params.treeNumber);
+      owner.totalTrees = owner.totalTrees.minus(diff);
+      app.totalTrees = app.totalTrees.minus(diff);
+
+      if (isAudited) {
+        app.auditedTrees = app.auditedTrees.minus(diff);
+        owner.auditedTrees = owner.auditedTrees.minus(diff);
+      }
+    }
+
+    tree.reportCount = tree.reportCount.plus(BigInt.fromI32(1));
+    report.tree = tree.id;
+
+    app.save();
+    tree.save();
+    owner.save();
   }
 
-  report.save()
+  report.save();
 }
 
 export function getOrCreateOwner(id: Address): Owner {
@@ -126,33 +167,37 @@ export function getOrCreateOwner(id: Address): Owner {
   if (owner == null) {
     owner = new Owner(id);
     owner.totalTrees = BigInt.fromI32(0);
+    owner.auditedTrees = BigInt.fromI32(0);
     owner.save();
   }
   return owner;
 }
 
-export function getOrCreateAuditor(id: Address): Auditor {
-  let auditor = Auditor.load(id);
-  if (auditor == null) {
-    auditor = new Auditor(id);
-    auditor.save();
-  }
-  return auditor;
-}
-
 export function getOrCreateNFT(address: Address, tokenId: BigInt): NFT {
-  let id = address.toHex() + "-" + tokenId.toHex()
+  let id = address.toHex() + "-" + tokenId.toHex();
   let nft = NFT.load(id);
   if (nft == null) {
     nft = new NFT(id);
 
     let instance = TreeNFT.bind(address);
-    let tokenUri = instance.try_tokenURI(tokenId)
+    let tokenUri = instance.try_tokenURI(tokenId);
     if (!tokenUri.reverted) {
-      nft.tokenUri = tokenUri.value
+      nft.tokenUri = tokenUri.value;
     }
 
     nft.save();
   }
   return nft;
+}
+
+export function getOrCreateApp(): App {
+  let app = App.load(APP_ID);
+  if (app === null) {
+    app = new App(APP_ID);
+
+    app.totalTrees = BigInt.fromI32(0);
+    app.auditedTrees = BigInt.fromI32(0);
+    app.save();
+  }
+  return app;
 }
