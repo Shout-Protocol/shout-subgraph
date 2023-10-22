@@ -1,38 +1,46 @@
+type Post @entity {
+  id: ID!
+  owner: User!
+  content: String!
+  boosts: [PostBoost!] @derivedFrom(field: "post")
+}
+
 type User @entity {
   id: ID!
   address: String!
-  balance: BigInt!
-  transactionCount: Int!
+  posts: [Post!] @derivedFrom(field: "owner")
+  boosts: [UserBoost!] @derivedFrom(field: "user")
 }
 
-type Minter @entity {
+type Boost @entity {
   id: ID!
-  address: String!
-  totalMinted: BigInt!
-  totalBurned: BigInt!
+  vault: YieldVault!
+  amount: BigInt!
+  usdVault: BigInt!
 }
 
-type UserCounter @entity {
+type PostBoost @entity {
   id: ID!
-  count: Int!
+  post: Post!
+  boost: Boost!
 }
 
-type MinterCounter @entity {
+type UserBoost @entity {
   id: ID!
-  count: Int!
+  user: User!
+  boost: Boost!
 }
 
-type TransferCounter @entity {
+type YieldVault @entity {
   id: ID!
-  count: Int!
-  totalTransferred: BigInt!
+  token: Token!
 }
 
-type TotalSupply @entity {
+type Token @entity {
   id: ID!
-  supply: BigInt!
-  minted: BigInt!
-  burned: BigInt!
+  symbol: String!
+  name: String!
+  decimals: BigInt!
 }
 
 type EpnsNotificationCounter @entity {

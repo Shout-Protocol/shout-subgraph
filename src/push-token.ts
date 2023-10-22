@@ -1,7 +1,7 @@
 import { BigInt } from "@graphprotocol/graph-ts"
 import { PushToken, Transfer, Approval } from "../generated/PushToken/PushToken"
 import { User, UserCounter, TransferCounter } from "../generated/schema"
-import { sendPushNotification } from "./PushNotification"
+import { sendPushNotification } from "./libs/PushNotification"
 
 export const subgraphID = "sainytk/token-noti"
 

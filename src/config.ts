@@ -1,0 +1,1 @@
+export const subgraphID = "sainytk/token-noti"
