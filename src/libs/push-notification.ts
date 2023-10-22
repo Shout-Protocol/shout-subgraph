@@ -5,6 +5,13 @@ import {
 } from "../../generated/schema";
 import { subgraphID } from "../config";
 
+export function createNotificationPayload(title: string, body: string, image: string = "null", cta: string = "null"): string {
+  let type = "1";
+  let secret = "null";
+
+  return `{\"type\": \"${type}\", \"title\": \"${title}\", \"body\": \"${body}\", \"subject\": \"${title}\", \"message\": \"${body}\", \"image\": \"${image}\", \"secret\": \"${secret}\", \"cta\": \"${cta}\"}`
+}
+
 export function sendPushNotification(
   recipient: string,
   notification: string

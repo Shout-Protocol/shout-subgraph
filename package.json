@@ -4,10 +4,10 @@
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ aiswaryawalter/push-graph-test",
-    "create-local": "graph create --node http://localhost:8020/ aiswaryawalter/push-graph-test",
-    "remove-local": "graph remove --node http://localhost:8020/ aiswaryawalter/push-graph-test",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 aiswaryawalter/push-graph-test",
+    "deploy": "graph deploy --product hosted-service sainytk/shout-protocol",
+    "create-local": "graph create --node http://localhost:8020/ sainytk/shout-protocol",
+    "remove-local": "graph remove --node http://localhost:8020/ sainytk/shout-protocol",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 sainytk/shout-protocol",
     "test": "graph test"
   },
   "dependencies": {

@@ -1,1 +1,1 @@
-export const subgraphID = "sainytk/token-noti"
+export const subgraphID = "sainytk/shout-protocol"

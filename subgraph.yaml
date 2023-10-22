@@ -29,6 +29,8 @@ dataSources:
           file: ./abis/ERC20.json
         - name: ERC4626
           file: ./abis/ERC4626.json
+        - name: IYieldVault
+          file: ./abis/IYieldVault.json
       eventHandlers:
         - event: PostCreated(indexed uint256,indexed address,string)
           handler: handlePostCreated
@@ -38,3 +40,24 @@ dataSources:
           handler: handleVaultAdded
         - event: YieldVaultPaused(indexed uint256,bool)
           handler: handleVaultPaused
+# templates:
+#   - kind: ethereum/contract
+#     name: VidefiContent
+#     network: goerli
+#     source:
+#       abi: VidefiContent
+#     mapping:
+#       kind: ethereum/events
+#       apiVersion: 0.0.7
+#       language: wasm/assemblyscript
+#       file: ./src/videfiContent.ts
+#       entities:
+#         - ContentNFT
+#         - User
+#         - App
+#       abis:
+#         - name: VidefiContent
+#           file: ./abis/VidefiContent.json
+#       eventHandlers:
+#         - event: Transfer(indexed address,indexed address,indexed uint256)
+#           handler: handleTransferEvent

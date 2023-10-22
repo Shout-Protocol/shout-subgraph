@@ -1,39 +1,34 @@
 type Post @entity {
   id: ID!
   owner: User!
-  content: String!
+  ipfsHash: String!
   boosts: [PostBoost!] @derivedFrom(field: "post")
 }
 
 type User @entity {
   id: ID!
-  address: String!
   posts: [Post!] @derivedFrom(field: "owner")
   boosts: [UserBoost!] @derivedFrom(field: "user")
-}
-
-type Boost @entity {
-  id: ID!
-  vault: YieldVault!
-  amount: BigInt!
-  usdVault: BigInt!
 }
 
 type PostBoost @entity {
   id: ID!
   post: Post!
-  boost: Boost!
+  vault: YieldVault!
+  amount: BigInt!
 }
 
 type UserBoost @entity {
   id: ID!
   user: User!
-  boost: Boost!
+  vault: YieldVault!
+  amount: BigInt!
 }
 
 type YieldVault @entity {
   id: ID!
   token: Token!
+  paused: Boolean!
 }
 
 type Token @entity {
@@ -54,4 +49,3 @@ type EpnsPushNotification @entity {
   recipient: String!
   notification: String!
 }
-
