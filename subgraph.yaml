@@ -1,60 +1,27 @@
-specVersion: 0.0.5
+specVersion: 0.0.4
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum
-    name: TreeController
+    name: PushToken
     network: goerli
     source:
-      address: "0xB0d4C0bc1D323abe1b043D9f26E9eCB0f2F45f4F"
-      abi: TreeController
-      startBlock: 8719620
+      address: "0x169fC7C4F6dC655c264354096989Cb8f8FA67BD3"
+      abi: PushToken
+      startBlock: 9904823
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.7
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
-        - Report
-        - Tree
-        - Owner
-        - Auditor
-        - NFT
+        - Transfer
+        - Approval
       abis:
-        - name: TreeController
-          file: ./abis/TreeController.json
-        - name: TreeNFT
-          file: ./abis/TreeNFT.json
+        - name: PushToken
+          file: ./abis/PushToken.json
       eventHandlers:
-        - event: TreeAdded(indexed address,indexed address,uint256,uint256)
-          handler: handleTreeAdded
-        - event: TreeTransferred(indexed address,indexed address,indexed address,uint256)
-          handler: handleTreeTransferred
-        - event: TreeWithdrew(indexed address,indexed address,uint256)
-          handler: handleTreeWithdrew
-        - event: TreeAudited(indexed address,indexed address,uint256,uint256)
-          handler: handleTreeAudited
-      file: ./src/tree-controller.ts
-
-  - kind: ethereum
-    name: TreeAuditorRegistry
-    network: goerli
-    source:
-      address: "0xD61cb2CF57d401513cf4B617ED606838246DAE45"
-      abi: TreeAuditorRegistry
-      startBlock: 8714461
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      entities:
-        - Owner
-        - Auditor
-      abis:
-        - name: TreeAuditorRegistry
-          file: ./abis/TreeAuditorRegistry.json
-      eventHandlers:
-        - event: AuditorAdded(indexed address)
-          handler: handleAuditorAdded
-        - event: AuditorRemoved(indexed address)
-          handler: handleAuditorRemoved
-      file: ./src/tree-auditor.ts
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleApproval
+      file: ./src/push-token.ts

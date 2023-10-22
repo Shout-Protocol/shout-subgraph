@@ -1,72 +1,49 @@
-type Feed @entity(immutable: true) {
+type User @entity {
   id: ID!
-  type: String!
-
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  tree: Tree
-
-  # Added / Withdraw
-  owner: Owner
-
-  # Transferred
-  from: Owner
-  to: Owner
-
-  # Audited
-  auditor: Auditor
-  report: Report
+  address: String!
+  balance: BigInt!
+  transactionCount: Int!
 }
 
-type Report @entity(immutable: true) {
+type Minter @entity {
   id: ID!
-  auditor: Auditor!
-  tree: Tree!
-  treeNumber: BigInt! # uint256
-  timestamp: BigInt!
-  transactionHash: Bytes!
+  address: String!
+  totalMinted: BigInt!
+  totalBurned: BigInt!
 }
 
-type Tree @entity {
+type UserCounter @entity {
   id: ID!
-  owner: Owner! # address
-  nftAddress: Bytes! # address
-  tokenId: BigInt! # uint256
-  nft: NFT!
-  treeNumber: BigInt! # uint256
-  isActive: Boolean!
-
-  reports: [Report!]! @derivedFrom(field: "tree")
-  reportCount: BigInt!
-
-  createdAt: BigInt!
-  createdTxHash: Bytes!
-  updatedAt: BigInt!
-  updatedTxHash: Bytes!
+  count: Int!
 }
 
-type Owner @entity {
-  id: Bytes! # Use bytes as ID
-  ownedTrees: [Tree!]! @derivedFrom(field: "owner")
-  totalTrees: BigInt!
-  auditedTrees: BigInt!
-  isAuditor: Boolean!
-}
-
-type Auditor @entity {
-  id: Bytes! # Use bytes as ID
-  isActive: Boolean!
-  auditReports: [Report!]! @derivedFrom(field: "auditor")
-}
-
-type NFT @entity {
-  id: ID! # Use bytes as ID
-  tokenUri: String!
-}
-
-type App @entity {
+type MinterCounter @entity {
   id: ID!
-  totalTrees: BigInt!
-  auditedTrees: BigInt!
+  count: Int!
 }
+
+type TransferCounter @entity {
+  id: ID!
+  count: Int!
+  totalTransferred: BigInt!
+}
+
+type TotalSupply @entity {
+  id: ID!
+  supply: BigInt!
+  minted: BigInt!
+  burned: BigInt!
+}
+
+type EpnsNotificationCounter @entity {
+  id: ID!
+  totalCount: BigInt!
+}
+
+type EpnsPushNotification @entity {
+  id: ID!
+  notificationNumber: BigInt!
+  recipient: String!
+  notification: String!
+}
+

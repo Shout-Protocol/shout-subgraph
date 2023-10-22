@@ -1,13 +1,13 @@
 {
-  "name": "scaling-tree",
+  "name": "push-graph-test",
   "license": "UNLICENSED",
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ scaling-tree",
-    "create-local": "graph create --node http://localhost:8020/ scaling-tree",
-    "remove-local": "graph remove --node http://localhost:8020/ scaling-tree",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 scaling-tree",
+    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ aiswaryawalter/push-graph-test",
+    "create-local": "graph create --node http://localhost:8020/ aiswaryawalter/push-graph-test",
+    "remove-local": "graph remove --node http://localhost:8020/ aiswaryawalter/push-graph-test",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 aiswaryawalter/push-graph-test",
     "test": "graph test"
   },
   "dependencies": {
